@@ -1,0 +1,7 @@
+elasticsearch>=7.14.0
+flatten-json>=0.1.13
+six>=1.16.0
+falcon-caching>=1.1.0
+limits>=2.7.0
+stringcase>=1.2.0
+jwcrypto>=1.4.2

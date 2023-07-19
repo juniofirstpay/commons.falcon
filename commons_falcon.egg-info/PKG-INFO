@@ -1,12 +1,9 @@
-Metadata-Version: 1.1
-Name: falcon-utils
-Version: 0.1.1
+Metadata-Version: 2.1
+Name: commons-falcon
+Version: 1.0.0
 Summary: Falcon Utilities, Middlewares, Error Classes
-Home-page: UNKNOWN
 Author: Develper Junio
 Author-email: developer@junio.in
 License: MIT license
-Description: UNKNOWN
-Platform: UNKNOWN
 Classifier: License :: OSI Approved :: MIT License
 Classifier: Programming Language :: Python :: 3.7

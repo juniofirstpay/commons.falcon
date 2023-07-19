@@ -1,7 +1,7 @@
 import typing
 import logging
-import falcon_utils.auth as auth_utils
-import falcon_utils.errors as errors
+import commons_falcon.auth as auth_utils
+import commons_falcon.errors as errors
 
 logger = logging.getLogger(__name__)
 

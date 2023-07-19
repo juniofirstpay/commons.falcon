@@ -8,7 +8,7 @@ try:
 except ImportError as e:
     logger.warn("falcon not found")
     
-import falcon_utils.errors as errors
+import commons_falcon.errors as errors
 
 
 class ApiVersioningScheme(object):

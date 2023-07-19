@@ -1,7 +1,7 @@
 import typing
 import mongoengine as mongo
 import marshmallow_objects as ms
-import falcon_utils.errors as errors
+import commons_falcon.errors as errors
 
 class SerializeSchema(object):
 
