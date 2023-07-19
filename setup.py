@@ -1,7 +1,5 @@
 from setuptools import setup, find_packages
 
-requirements = open('./requirements.txt', 'r').read().split("\n")
-
 setup(
     name='commons-falcon',
     packages=[
