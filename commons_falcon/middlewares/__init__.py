@@ -2,3 +2,4 @@ from .json_middleware import JsonMiddleware
 from .auth_middleware import SimpleAuthMiddleware
 from .prometheus_middleware import PrometheusMiddleware
 from .elastic_search_logging_middleware import ESLoggingMiddleware
+from .request_id import configure_falcon_request_id_middleware
