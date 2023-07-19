@@ -1,6 +1,18 @@
 import time
-from prometheus_client import Counter
-from falcon_prometheus import PrometheusMiddleware
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    from prometheus_client import Counter
+except ImportError as e:
+    logger.warn("prometheus_client not found")
+
+try:
+    from falcon_prometheus import PrometheusMiddleware
+except ImportError as e:
+    logger.warn("falcon_prometheus not found")
+
 
 class PrometheusMiddlewareCustom(PrometheusMiddleware):
     def __init__(self, *args, **kwargs):

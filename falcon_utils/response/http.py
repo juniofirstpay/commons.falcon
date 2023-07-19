@@ -1,10 +1,21 @@
-import requests
-from typing import Optional, Type, Tuple, Union, Dict
-from marshmallow_objects import Schema
+import typing
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    import requests
+except ImportError as e:
+    logger.warn("Requests module not found.")
+
+try:
+    import marshmallow_objects as ms
+except ImportError as e:
+    logger.warn("marshmallow_objects module not found.")
 
 def process_result_with_code(result: requests.Response,
                              req_log_obj=None,
-                             schema: Optional[Type[Schema]] = None) -> Tuple[int, Union[Dict, str]]:
+                             schema: typing.Optional[typing.Type[ms.Schema]] = None) -> typing.Tuple[int, typing.Union[dict, str]]:
     response = {}
     if result.status_code == 200:
         if schema is not None:

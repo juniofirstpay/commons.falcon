@@ -1,19 +1,18 @@
-from typing import Type
-from mongoengine import Document, QuerySet
-from marshmallow import ValidationError
-from marshmallow_objects import Model
-from falcon_utils.errors import DataSerializationError
+import typing
+import mongoengine as mongo
+import marshmallow_objects as ms
+import falcon_utils.errors as errors
 
 class SerializeSchema(object):
 
-    def __init__(self, schema: "Type[Model]", paginated=False):
+    def __init__(self, schema: "typing.Type[ms.Model]", paginated=False):
         self.schema = schema
         self.paginated = paginated
 
     def __call__(self, req, resp, *args, **kwargs):
         try:
             data = resp.json
-            if isinstance(data, list) or isinstance(data, QuerySet):
+            if isinstance(data, list) or isinstance(data, mongo.QuerySet):
                 resp.json = self.schema().dump(data, many=True)
                 if self.paginated:
                     resp.json = {
@@ -22,10 +21,10 @@ class SerializeSchema(object):
                         'page': resp.page,
                         'page_size': resp.page_size
                     }
-            elif issubclass(data.__class__, Document):
+            elif issubclass(data.__class__, mongo.Document):
                 resp.json = self.schema().dump(data)
             elif not isinstance(data, dict):
                 resp.json = self.schema().dump(data)
             
-        except ValidationError as err:
-            raise DataSerializationError(err.messages)
+        except ms.ValidationError as err:
+            raise errors.DataSerializationError(err.messages)

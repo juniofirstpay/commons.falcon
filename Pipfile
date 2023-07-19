@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+falcon-caching = "==1.1.0"
+marshmallow-objects = "*"
+flatten-json = "*"
+elasticsearch = "*"
+limits = "*"
+stringcase = "*"
+
+[dev-packages]
+falcon = "==3.1"
+jwcrypto = "*"
+requests = "*"
+bson = "*"
+mongoengine = "*"
+
+[requires]
+python_version = "3.9"

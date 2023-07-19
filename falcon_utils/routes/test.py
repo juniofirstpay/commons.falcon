@@ -1,6 +1,12 @@
 import json
-import falcon
+import logging
 
+logger = logging.get_logger(__name__)
+
+try:
+    import falcon
+except Exception as e:
+    logger.warn("falcon module not found.")
 
 class TestRoute:
     def on_get(self, req, resp):

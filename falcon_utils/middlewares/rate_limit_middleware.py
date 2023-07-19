@@ -1,8 +1,20 @@
 import enum
-import falcon
-from typing import List, Dict
-from limits import storage, strategies, parse
-from falcon_utils.errors import RateLimitError
+import typing
+import logging
+import falcon_utils.errors as errors
+
+logger = logging.getLogger(__name__)
+
+try:
+    import falcon
+except ImportError as e:
+    logger.warn("falcon module not found")
+
+try:
+    import limits
+except ImportError as e:
+    logger.warn("limits module not found")
+    
 
 class RateLimitingMiddleware:
     
@@ -11,21 +23,21 @@ class RateLimitingMiddleware:
         ELASTIC_WINDOW = 2
         MOVING_WINDOW = 3
     
-    def __init__(self, config: "Dict"):
+    def __init__(self, config: "type.Dict"):
         self.__limiters = {}
         self.__config = config
         if self.__config.get('url'):
-            self.__storage = storage.RedisStorage(self.__config['url'])
+            self.__storage = limits.storage.RedisStorage(self.__config['url'])
         elif self.__config.get('password'):
-            self.__storage = storage.RedisStorage(f"redis://{self.__config['username']}:{self.__config['password']}@{self.__config['host']}:{self.__config['port']}")
+            self.__storage = limits.storage.RedisStorage(f"redis://{self.__config['username']}:{self.__config['password']}@{self.__config['host']}:{self.__config['port']}")
         else:
-            self.__storage = storage.RedisStorage(f"redis://{self.__config['host']}:{self.__config['port']}")
+            self.__storage = limits.storage.RedisStorage(f"redis://{self.__config['host']}:{self.__config['port']}")
         if self.__config["type"] == self.Type.FIXED_WINDOW:
-            self.__strategy = strategies.FixedWindowRateLimiter(self.__storage)
+            self.__strategy = limits.strategies.FixedWindowRateLimiter(self.__storage)
         elif self.__config["type"] == self.Type.ELASTIC_WINDOW:
-            self.__strategy = strategies.FixedWindowElasticExpiryRateLimiter(self.__storage)
+            self.__strategy = limits.strategies.FixedWindowElasticExpiryRateLimiter(self.__storage)
         elif self.__config["type"] == self.Type.MOVING_WINDOW:
-            self.__strategy = strategies.MovingWindowRateLimiter(self.__storage)
+            self.__strategy = limits.strategies.MovingWindowRateLimiter(self.__storage)
     
     @property
     def middleware(self):
@@ -40,13 +52,13 @@ class RateLimitingMiddleware:
                 resp.complete = True
                 reset_time, _ = self.__strategy.get_window_stats(blocking_limit_item, req.path, req.method)
                 resp.append_header('X-Rate-Limit-ResetTime',reset_time)
-                raise RateLimitError()
+                raise errors.RateLimitError()
     
-    def apply_limits(self, limiters: "List[str]"):
+    def apply_limits(self, limiters: "typing.List[str]"):
         
         def hook_func(func):
             namespace = f"{func.__qualname__}"
-            self.__limiters[namespace] = list(map(lambda x: parse(x), limiters))
+            self.__limiters[namespace] = list(map(lambda x: limits.parse(x), limiters))
             return func
             
         return hook_func

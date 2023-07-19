@@ -1,5 +1,12 @@
-import falcon
-from typing import Dict, Any, Optional
+import typing
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    import falcon
+except ImportError as e:
+    logger.warn("falcon module not found")
 
 
 class ApplicationError(falcon.HTTPError):
@@ -23,9 +30,9 @@ class SchemaValidationError(ApplicationError):
 
     def __init__(
         self,
-        fields: Dict[str, Any],
-        description: Optional[str] = None,
-        code: Optional[str] = "200",
+        fields: typing.Dict[str, typing.Any],
+        description: typing.Optional[str] = None,
+        code: typing.Optional[str] = "200",
     ):
         super(SchemaValidationError, self).__init__(
             title="SchemaValidationFailed", description=description, code=code
@@ -134,7 +141,7 @@ class VoucherRedeemError(ApplicationError):
 
 class DataSerializationError(falcon.HTTPError):
 
-    def __init__(self, fields: Dict[str, Any], description: Optional[str] = None, code: Optional[str] = '200'):
+    def __init__(self, fields: typing.Dict[str, typing.Any], description: typing.Optional[str] = None, code: typing.Optional[str] = '200'):
         super().__init__(
             '400',
             title='DataSerializationFailed',

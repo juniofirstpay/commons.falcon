@@ -2,8 +2,23 @@ import json
 import re
 import falcon
 import six
+import logging
 from datetime import datetime
-from bson.json_util import dumps
+
+
+logger = logging.getLogger(__name__)
+
+bs = None
+try:
+    import bson.json_utils as bs
+except ImportError as e:
+    logger.error(e)
+
+if bs is None:
+    try:
+        import bson as bs
+    except ImportError as e:
+        logger.error(e)
 
 
 class DateTimeEncoder(json.JSONEncoder):
@@ -134,4 +149,4 @@ class JsonMiddleware(object):
     def process_response(self, req, resp, resource, req_succeeded):
         """Middleware response"""
         if getattr(resp, "json", None) is not None:
-            resp.body = str.encode(dumps(resp.json))
+            resp.body = str.encode(bs.dumps(resp.json))

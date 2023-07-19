@@ -1,34 +1,41 @@
-from typing import Callable, Dict, Optional, Tuple
-import falcon
+import logging
+import typing
 
-from falcon_utils.errors import InvalidApiVersionScheme
+logger = logging.getLogger(__name__)
+
+try:
+    import falcon
+except ImportError as e:
+    logger.warn("falcon not found")
+    
+import falcon_utils.errors as errors
 
 
 class ApiVersioningScheme(object):
     def on_get(self, req: "falcon.Request", resp: "falcon.Request", *args, **kwargs):
-        api_version: "Optional[str]" = req.headers.get("X-API-VERSION")
+        api_version: "typing.Optional[str]" = req.headers.get("X-API-VERSION")
         if not api_version:
             self.get(req, resp, *args, **kwargs)
             return
 
-        route_handler: "Callable[[falcon.Request, falcon.Response, Tuple, Dict], None]" = getattr(
+        route_handler: "typing.Callable[[falcon.Request, falcon.Response, typing.Tuple, typing.Dict], None]" = getattr(
             self, f"on_get_{api_version}", None
         )
         if not route_handler:
-            raise InvalidApiVersionScheme()
+            raise errors.InvalidApiVersionScheme()
 
         route_handler(req, resp, *args, **kwargs)
 
     def on_post(self, req: "falcon.Request", resp: "falcon.Request", *args, **kwargs):
-        api_version: "Optional[str]" = req.headers.get("X-API-VERSION")
+        api_version: "typing.Optional[str]" = req.headers.get("X-API-VERSION")
         if not api_version:
             self.post(req, resp, *args, **kwargs)
             return
 
-        route_handler: "Callable[[falcon.Request, falcon.Response, Tuple, Dict], None]" = getattr(
+        route_handler: "typing.Callable[[falcon.Request, falcon.Response, typing.Tuple, typing.Dict], None]" = getattr(
             self, f"on_post_{api_version}", None
         )
         if not route_handler:
-            raise InvalidApiVersionScheme()
+            raise errors.InvalidApiVersionScheme()
 
         route_handler(req, resp, *args, **kwargs)

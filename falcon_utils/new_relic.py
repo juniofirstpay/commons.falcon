@@ -1,14 +1,21 @@
 import os
-import falcon
-import newrelic.agent
 import traceback
-from typing import Optional
+import typing
+import logging
+
+logger = logging.getLogger(__name__)
+
+try:
+    import newrelic.agent
+except ImportError as e:
+    logger.warn("NewRelic Agent is not installed")
+
 
 DEFAULT_FILE_PATH = os.path.join(os.getcwd(), "./new-relic.ini")
 
 
 def setup_new_relic(
-    environment: str, app: "falcon.App", file_path: "Optional[str]" = None
+    environment: str, app: "falcon.App", file_path: "typing.Optional[str]" = None
 ):
     try:
         newrelic.agent.initialize(

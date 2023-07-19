@@ -1,21 +1,57 @@
-from enum import Enum
+import enum
 import json
-from typing import Union
-import requests
+import typing
 import datetime
-from jwcrypto.jwt import JWT, JWTExpired
-from jwcrypto.common import JWException
-from jwcrypto.jwk import JWKSet
-from functools import lru_cache, wraps
+import functools
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+try:
+    import requests
+except ImportError as e:
+    logger.warn("requests module not found")
+
+try:
+    import jwcrypto.jwt as jwt
+    import jwcrypto.jwk as jwk
+    import jwcrypto.common as jwt_commons
+except ImportError as e:
+    logger.warn("jwtcrypto module not found")
+
+
+
+__all__ = ('AuthorizationScheme', 'AccessLevel', 'JWTVerificationError', 'timed_lru_cache', 'JWTVerifyService',)
+
+class AuthorizationScheme(enum.Enum):
+    JWT = "jwt"
+    EXEMPTED_PATH = "exempted_path"
+    IP_WHITELIST = "ip_whitelist"
+    API_KEY = "api_key"
+    CLIENT_SECRET = "client_secret"
+    ACCESS_TOKEN = "access_token"
+
+
+class AccessLevel(enum.Enum):
+    SELF = "self"
+    DEPENDANT = "dependant"
+    SELF_AND_DEPENDANT = "self_and_dependant"
+
+
+class JWTVerificationError(enum.Enum):
+    EXPIRED = "expired"
+    INVALID = "invalid"
+    INTERNAL = "internal"
 
 
 def timed_lru_cache(seconds: int, maxsize: int = 128):
     def wrapper_cache(func):
-        func = lru_cache(maxsize=maxsize)(func)
+        func = functools.lru_cache(maxsize=maxsize)(func)
         func.lifetime = datetime.timedelta(seconds=seconds)
         func.expiration = datetime.datetime.utcnow() + func.lifetime
 
-        @wraps(func)
+        @functools.wraps(func)
         def wrapped_func(*args, **kwargs):
             if datetime.datetime.utcnow() >= func.expiration:
                 func.cache_clear()
@@ -42,40 +78,21 @@ class JWTVerifyService:
 
         return response.json()
 
-    def verify(self, token: str) -> "Union[tuple[JWTVerificationError, None], tuple[None, str]]":
+    def verify(self, token: str) -> "typing.Union[tuple[JWTVerificationError, None], tuple[None, str]]":
         try:
             jwk_api_response = self.fetch_jwk()
             if not jwk_api_response:
                 return JWTVerificationError.INTERNAL, None
 
-            jwk_set = JWKSet.from_json(json.dumps(jwk_api_response))
-            decoded_token = JWT(key=jwk_set, jwt=token)
+            jwk_set = jwk.JWKSet.from_json(json.dumps(jwk_api_response))
+            decoded_token = jwt.JWT(key=jwk_set, jwt=token)
             claims = json.loads(decoded_token.claims)
 
             return None, claims
-        except (JWException, ValueError) as error:
-            if isinstance(error, JWTExpired):
+        except (jwt_commons.JWException, ValueError) as error:
+            if isinstance(error, jwt.JWTExpired):
                 return JWTVerificationError.EXPIRED, None
             
             return JWTVerificationError.INVALID, None
 
 
-class AuthorizationScheme(Enum):
-    JWT = "jwt"
-    EXEMPTED_PATH = "exempted_path"
-    IP_WHITELIST = "ip_whitelist"
-    API_KEY = "api_key"
-    CLIENT_SECRET = "client_secret"
-    ACCESS_TOKEN = "access_token"
-
-
-class AccessLevel(Enum):
-    SELF = "self"
-    DEPENDANT = "dependant"
-    SELF_AND_DEPENDANT = "self_and_dependant"
-
-
-class JWTVerificationError(Enum):
-    EXPIRED = "expired"
-    INVALID = "invalid"
-    INTERNAL = "internal"

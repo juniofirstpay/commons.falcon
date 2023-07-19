@@ -1,9 +1,20 @@
+import logging
 import traceback
 import falcon
 import json
 from datetime import datetime
-from flatten_json import flatten
-from elasticsearch import Elasticsearch
+
+logger = logging.getLogger(__name__)
+
+try:
+    import elasticsearch as esc
+except ImportError as e:
+    logger.warn("ElasticSearch is not found.")
+
+try:
+    import flatten_json as fj
+except ImportError as e:
+    logger.warn("flatten_json module not found")
 
 
 class ESLoggingMiddleware:
@@ -17,7 +28,7 @@ class ESLoggingMiddleware:
         request_timeout: "int" = 5,
         index: "str" = None,
     ):
-        es = Elasticsearch(
+        es = esc.Elasticsearch(
             [host],
             port=port,
             http_auth=(username, password),
@@ -47,7 +58,7 @@ class ESLoggingMiddleware:
                     for key, value in params.items():
                         req.es_doc["req.params." + key] = value
         except Exception as e:
-            print(e)
+            logger.error(e)
 
     def process_response(self, req, resp, resource, res_succeeded):
         try:
@@ -62,7 +73,7 @@ class ESLoggingMiddleware:
                     if resp.status != falcon.HTTP_200:
                         resp_json = json.loads(resp.data or "{}")
 
-                        error = flatten(resp_json)
+                        error = fj.flatten(resp_json)
                         for key, value in error.items():
                             req.es_doc["resp.error." + key] = value
 
@@ -70,13 +81,13 @@ class ESLoggingMiddleware:
                             req, "error_traceback", None
                         )
                 except Exception as e:
-                    print(resp_json)
-                    traceback.print_exc()
+                    logger.error(json.dumps(resp_json))
+                    logger.error(traceback.format_exc())
 
             if getattr(req, "es_doc") is not None:
                 try:
                     self.logger(req.es_doc)
                 except Exception as e:
-                    print("ES_ERROR", e)
+                    logger.error(e)
         except Exception as e:
-            print(e)
+            logger.error(e)

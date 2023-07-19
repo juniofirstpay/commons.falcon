@@ -1,10 +1,16 @@
-from marshmallow_objects import ValidationError
-from falcon_utils.errors import SchemaValidationError
+import logging
+import falcon_utils.errors as errors
 
+logger = logging.getLogger(__name__)
+
+try:
+    import marshmallow_objects as ms
+except ImportError as e:
+    logger.warn("marshmallow_objects not found")
 
 class MapQuery(object):
 
-    def __init__(self, schema, list_fields=[]):
+    def __init__(self, schema: "ms.Schema", list_fields=[]):
         self.schema = schema
         self.list_fields = list_fields
 
@@ -13,5 +19,5 @@ class MapQuery(object):
             for field in self.list_fields:
                 req.params[field] = req.get_param_as_list(field)
             setattr(req.context, 'data', self.schema(**req.params))
-        except ValidationError as err:
-            raise SchemaValidationError(err.messages)
+        except ms.ValidationError as err:
+            raise errors.SchemaValidationError(err.messages)
