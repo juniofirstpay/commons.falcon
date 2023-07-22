@@ -11,7 +11,7 @@ middleware = None
 route = None
 metrics = None
 
-def configure_falcon_prometheus(multiprocess=False):
+def configure_falcon_prometheus(workers=False):
     global registry
     global middleware
     global metrics
@@ -19,7 +19,7 @@ def configure_falcon_prometheus(multiprocess=False):
 
     registry = CollectorRegistry()
 
-    if multiprocess:
+    if workers:
         multiprocess.MultiProcessCollector(registry)
 
     NUM_INCOMING_REQUESTS = Counter("http_incoming_requests", "Total HTTP Requests", labelnames=["method", "path", "host"])  
