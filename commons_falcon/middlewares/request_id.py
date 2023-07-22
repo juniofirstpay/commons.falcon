@@ -7,7 +7,7 @@ __all__ = ('FALCON_HEADER_REQUEST_ID', 'configure_falcon_request_id_middleware',
 FALCON_HEADER_REQUEST_ID = 'x-request-id'
 
 def generate_request_id():
-    return "{}.{}".format(datetime.utcnow().timestamp(), secrets.token_bytes(16))
+    return "{}.{}".format(datetime.utcnow().timestamp(), secrets.token_bytes(16).hex())
 
 def configure_falcon_request_id_middleware():
     import falcon
