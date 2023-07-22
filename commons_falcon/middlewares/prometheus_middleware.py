@@ -1,7 +1,7 @@
+import structlog
 import time
-import logging
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 try:
     from prometheus_client import Counter

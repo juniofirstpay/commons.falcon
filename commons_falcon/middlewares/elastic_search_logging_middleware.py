@@ -1,10 +1,10 @@
-import logging
+import structlog
 import traceback
 import falcon
 import json
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 try:
     import elasticsearch as esc

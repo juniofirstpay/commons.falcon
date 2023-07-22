@@ -1,8 +1,8 @@
 import io
 import base64
-import logging
+import structlog
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 try:
     import pandas as pd

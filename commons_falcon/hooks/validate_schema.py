@@ -1,8 +1,8 @@
 import typing
-import logging
+import structlog
 import commons_falcon.errors as errors
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 try:
     import marshmallow_objects as ms

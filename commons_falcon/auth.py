@@ -1,11 +1,11 @@
+import structlog
 import enum
 import json
 import typing
 import datetime
 import functools
-import logging
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 try:

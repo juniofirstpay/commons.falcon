@@ -1,7 +1,7 @@
+import structlog
 import json
-import logging
 
-logger = logging.get_logger(__name__)
+logger = structlog.get_logger(__name__)
 
 try:
     import falcon

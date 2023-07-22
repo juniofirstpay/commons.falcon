@@ -1,9 +1,9 @@
+import structlog
 import inspect
 import functools
 import typing
-import logging
 
-logger = logging.get_logger(__name__)
+logger = structlog.get_logger(__name__)
 
 try:
     import falcon_caching as caching

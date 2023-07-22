@@ -1,7 +1,7 @@
+import structlog
 import typing
-import logging
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 try:
     import requests

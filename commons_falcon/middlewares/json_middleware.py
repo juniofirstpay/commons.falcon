@@ -1,12 +1,12 @@
+import structlog
 import json
 import re
 import falcon
 import six
-import logging
 from datetime import datetime
 
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 bs = None
 try:
