@@ -1,9 +1,22 @@
+import structlog
 from time import perf_counter
 from prometheus_client import multiprocess
 from prometheus_client import CollectorRegistry, generate_latest, CONTENT_TYPE_LATEST, Counter, Summary
 
+
+logger = structlog.get_logger(__name__)
+
+registry = None
+middleware = None
+route = None
+metrics = None
+
 def configure_falcon_prometheus(multiprocess=False):
-    
+    global registry
+    global middleware
+    global metrics
+    global route
+
     registry = CollectorRegistry()
 
     if multiprocess:
@@ -30,17 +43,19 @@ def configure_falcon_prometheus(multiprocess=False):
 
         def on_get(self, req: "falcon.Request", resp: "falcon.Response", *args, **kwargs):
             data = generate_latest(registry)
+            logger.debug(data)
+
             resp.headers["Content-Type"] = CONTENT_TYPE_LATEST
             resp.content_type = CONTENT_TYPE_LATEST
             resp.data = data
 
-    return {
-        'metrics': {
-            'NUM_INCOMING_REQUESTS': NUM_INCOMING_PROCESSED_REQUESTS,
-            'NUM_INCOMING_PROCESSED_REQUESTS': NUM_INCOMING_PROCESSED_REQUESTS,
-            'REQUEST_TIME': REQUEST_TIME,
-            'REQUEST_PAYLOAD_SIZE': REQUEST_PAYLOAD_SIZE,
-        },
-        'middleware': PrometheusMiddleware,
-        'metrics_route': MetricsRoute
+
+
+    middleware = PrometheusMiddleware
+    metrics = {
+        'NUM_INCOMING_REQUESTS': NUM_INCOMING_PROCESSED_REQUESTS,
+        'NUM_INCOMING_PROCESSED_REQUESTS': NUM_INCOMING_PROCESSED_REQUESTS,
+        'REQUEST_TIME': REQUEST_TIME,
+        'REQUEST_PAYLOAD_SIZE': REQUEST_PAYLOAD_SIZE,
     }
+    route = MetricsRoute
